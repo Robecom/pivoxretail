@@ -29,5 +29,6 @@ def card(p,email):
     esc = lambda s: s.replace("&","&amp;").replace("'","&#39;").replace('"',"&quot;")
     if p.get("m"): pic = f"<div class='pic photo'><img src='/images/products/{p['m']}' alt='{esc(p['b']+' '+p['n'])}' loading='lazy'></div>"
     else: pic = f"<div class='pic' style='--c:{COL[p['c']]}'><svg viewBox='0 0 240 240' aria-hidden='true'><use href='/sprites.svg#{SHAPES[p['h']]}-{p['k']}'/></svg></div>"
+    href = f"/product/{p['u']}.html"
     mail = f"mailto:{email}?subject=" + quote(f"Inquiry: {p['b']} {p['n']} ({p['u']})")
-    return f"<article class='card' data-cat='{p['c']}'>{pic}<div class='info'><p class='brand'>{esc(p['b'])}</p><h3>{esc(p['n'])}</h3><p class='size'>{esc(p['s'])}</p><span class='price'>${p['p']:.2f}</span><a class='ask' href='{mail}'>Ask about availability</a></div></article>"
+    return f"<article class='card' data-cat='{p['c']}'><a class='pic-link' href='{href}' tabindex='-1' aria-hidden='true'>{pic}</a><div class='info'><p class='brand'>{esc(p['b'])}</p><h3><a href='{href}'>{esc(p['n'])}</a></h3><p class='size'>{esc(p['s'])}</p><span class='price'>${p['p']:.2f}</span><a class='ask' href='{mail}'>Ask about availability</a></div></article>"

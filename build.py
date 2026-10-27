@@ -70,3 +70,38 @@ bl="".join(f"<li><a href='/products.html?brand={quote(b)}'>{b.replace('&','&amp;
 page("brands","Brands","Brands offered by Pivox Retail: pantry, sauces, snacks, beverages and baking goods.",f"<section class='wrap doc'><h1>Brands</h1><p class='lead'>{len(bc)} brands and {len(PRODUCTS):,} products. Select a brand to see what we carry.</p><ul class='brands'>{bl}</ul><p class='small'>All brand names and trademarks are the property of their respective owners and are used only to identify the genuine products we sell. Pivox Retail is not affiliated with, sponsored by or endorsed by these brands.</p></section>")
 open("sprites.svg","w").write(sprites()); write_json()
 page("404","Page not found","Page not found.","<section class='wrap doc'><h1>Page not found</h1><p>That page does not exist. Return to the <a href='/'>home page</a> or <a href='/products.html'>browse products</a>.</p></section>")
+
+# ---- one page per product + sitemap ----
+import os, shutil, json as _json
+from html import escape as _h
+shutil.rmtree("product", ignore_errors=True); os.makedirs("product")
+_brand, _cat, CATN = {}, {}, dict(CATS)
+for _p in PRODUCTS: _brand.setdefault(_p["b"], []).append(_p); _cat.setdefault(_p["c"], []).append(_p)
+def related(p):
+    L = _brand[p["b"]]; i = L.index(p); r = (L[i+1:] + L[:i])[:4]
+    if len(r) < 4:
+        pool = [q for q in _cat[p["c"]] if q["b"] != p["b"]]
+        if pool: s = int(p["u"]) % len(pool); r += (pool[s:] + pool[:s])[:4-len(r)]
+    return r
+def pdp(p):
+    u, b, n, s, c = p["u"], p["b"], p["n"], p["s"], p["c"]
+    bq = quote(b); mail = f"mailto:{EMAIL}?subject=" + quote(f"Inquiry: {b} {n} ({u})")
+    if p.get("m"): pic = f"<div class='pdp-img'><img src='/images/products/{p['m']}' alt='{_h(b+' '+n+', '+s)}'></div>"
+    else: pic = f"<div class='pdp-img ill' style='--c:{COL[c]}'><svg viewBox='0 0 240 240' aria-hidden='true'><use href='/sprites.svg#{SHAPES[p['h']]}-{p['k']}'/></svg></div>"
+    url = f"https://{DOMAIN}/product/{u}.html"
+    ld = {"@context":"https://schema.org","@type":"Product","name":f"{b} {n}","brand":{"@type":"Brand","name":b},"sku":u.zfill(12),"gtin12":u.zfill(12),"category":CATN[c],
+          "offers":{"@type":"Offer","url":url,"price":f"{p['p']:.2f}","priceCurrency":"USD","seller":{"@type":"Organization","name":NAME}}}
+    if p.get("m"): ld["image"] = f"https://{DOMAIN}/images/products/{p['m']}"
+    ldj = _json.dumps(ld, ensure_ascii=False).replace("</", "<\\/")
+    rel = "".join(card(q, EMAIL) for q in related(p))
+    body = f"""<section class="wrap pdp-wrap"><nav class="crumbs" aria-label="Breadcrumb"><a href="/products.html">Shop</a> / <a href="/products.html?cat={c}">{CATN[c]}</a> / <a href="/products.html?brand={bq}">{_h(b)}</a></nav>
+<div class="pdp">{pic}<div class="pdp-info"><p class="brand"><a href="/products.html?brand={bq}">{_h(b)}</a></p><h1>{_h(n)}</h1><p class="size">{_h(s)}</p><p class="pdp-price">${p['p']:.2f}</p><a class="pill dark" href="{mail}">Ask about availability</a>
+<p class="small" style="margin-top:14px">To order, email <a href="mailto:{EMAIL}">{EMAIL}</a>. Ships from U.S. warehouses. See our <a href="/shipping.html">shipping</a> and <a href="/returns.html">return</a> policies.</p>
+<dl class="facts"><div><dt>Brand</dt><dd>{_h(b)}</dd></div><div><dt>Size</dt><dd>{_h(s)}</dd></div><div><dt>Category</dt><dd>{CATN[c]}</dd></div><div><dt>UPC</dt><dd>{u.zfill(12)}</dd></div></dl></div></div>
+<h2>More like this</h2><div class="cards">{rel}</div></section><script type="application/ld+json">{ldj}</script>"""
+    page(f"product/{u}", f"{n} by {b}", f"{b} {n}, {s}. ${p['p']:.2f}. Shipped from U.S. warehouses by Pivox Retail.", body)
+for _p in PRODUCTS: pdp(_p)
+_urls = [""] + [f"{x}.html" for x in ("products","brands","about","contact","shipping","returns","privacy","terms","accessibility")] + [f"product/{p['u']}.html" for p in PRODUCTS]
+open("sitemap.xml","w").write('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(f"<url><loc>https://{DOMAIN}/{x}</loc></url>" for x in _urls) + "</urlset>")
+open("robots.txt","w").write(f"User-agent: *\nAllow: /\nSitemap: https://{DOMAIN}/sitemap.xml\n")
+print(len(PRODUCTS), "product pages written")
