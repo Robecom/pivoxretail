@@ -7,7 +7,7 @@ import json, os, sys, urllib.request, urllib.error
 from concurrent.futures import ThreadPoolExecutor
 HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, "images", "products"); os.makedirs(OUT, exist_ok=True)
 BASE = os.environ.get("KEHE_BASE", "https://s3.amazonaws.com/kehe-connect/prod/public_common/catalogimages/{size}/{upc}.jpg")
-UA = "Mozilla/5.0 (PivoxRetail catalog builder)"
+UA = "Mozilla/5.0 (PivoxMarket catalog builder)"
 prods = json.load(open(os.path.join(HERE, "products_all.json"), encoding="utf-8"))
 miss_path = os.path.join(OUT, "_no_image.txt")
 known_missing = set() if "--retry" in sys.argv or not os.path.exists(miss_path) else set(open(miss_path).read().split())

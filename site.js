@@ -37,7 +37,7 @@ more.addEventListener('click',function(){draw(false)});
 fetch('/products.json').then(function(r){return r.json()}).then(function(d){
   all=d;var u=new URLSearchParams(location.search),b=u.get('brand'),c=u.get('cat')||location.hash.slice(1);
   if(c&&COL[c]){st.c=c;chips.forEach(function(x){x.setAttribute('aria-pressed',x.dataset.f===c)})}
-  if(b){st.b=b;sel.value=b}
-  if(st.c==='all'&&!st.b){view=all;shown=Math.min(PAGE,all.length);more.hidden=shown>=view.length;label()}else apply();
+  if(b){st.b=b;sel.value=b}var q0=u.get('q');if(q0){st.q=q0;q.value=q0}
+  if(st.c==='all'&&!st.b&&!st.q){view=all;shown=Math.min(PAGE,all.length);more.hidden=shown>=view.length;label()}else apply();
 }).catch(function(){count.textContent='The catalog could not be loaded. Please email us.'});
 })();

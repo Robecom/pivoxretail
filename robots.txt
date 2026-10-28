@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://pivoxretail.com/sitemap.xml
+Sitemap: https://pivoxmarket.com/sitemap.xml
