@@ -49,10 +49,20 @@ def doc(slug,title,desc,html): page(slug,title,desc,f"<section class='wrap doc'>
 cats=[("Pantry staples","Salts, broths, vinegars, preserves and everyday cooking basics."),("Condiments and sauces","Hot sauces, dressings, marinades, pasta sauces and seasonings."),("Snacks, sweets and bakery","Chips, bars, crackers, chocolate, candy and baked goods."),("Beverages","Sparkling water, soda, tea, coconut water and plant-based milks."),("Grains, baking and dairy alternatives","Rice, flour, pasta, baking mixes and plant-based alternatives.")]
 cards="".join(f"<li><h3>{a}</h3><p>{b}</p></li>" for a,b in cats)
 NB=len(CARRIED)
-def featured():
-    seen,out=set(),[]
-    for p in PRODUCTS:
-        if p["c"] in ("pantry","sauces","snacks","beverages") and p["c"] not in seen: seen.add(p["c"]); out.append(p)
+def featured(n=12):
+    cats=["pantry","sauces","snacks","beverages","grains"]; pools={k:[p for p in PRODUCTS if p["c"]==k] for k in cats}
+    out,seen=[],set()
+    for strict in (True,False):   # first pass: one product per brand; second pass fills any gaps
+        idx={k:0 for k in cats}; progress=True
+        while len(out)<n and progress:
+            progress=False
+            for k in cats:
+                L=pools[k]
+                while idx[k]<len(L):
+                    p=L[idx[k]]; idx[k]+=1
+                    if p in out or (strict and p["b"] in seen): continue
+                    out.append(p); seen.add(p["b"]); progress=True; break
+                if len(out)>=n: break
     return out
 def sample(c):
     from collections import Counter
@@ -78,7 +88,7 @@ import json as _j
 ORG_LD=_j.dumps({"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":f"https://{DOMAIN}/#org","name":STORE,"legalName":NAME,"url":f"https://{DOMAIN}/","logo":f"https://{DOMAIN}/icon-512.png","email":EMAIL,"address":{"@type":"PostalAddress","streetAddress":"2222 W Grand River Ave, Ste A","addressLocality":"Okemos","addressRegion":"MI","postalCode":"48864","addressCountry":"US"}},{"@type":"WebSite","name":STORE,"url":f"https://{DOMAIN}/","publisher":{"@id":f"https://{DOMAIN}/#org"},"potentialAction":{"@type":"SearchAction","target":f"https://{DOMAIN}/products.html?q="+"{search_term_string}","query-input":"required name=search_term_string"}}]},ensure_ascii=False)
 page("index","Pivox Market: Pantry, Sauces, Snacks & Drinks from Trusted Brands","Shop pantry staples, sauces, snacks, drinks and baking goods from well-known brands. Shipped from U.S. warehouses with 30-day returns.",f"""
 <section class="wrap hero{herocls}"><div class="herotxt"><h1>Pantry favorites, delivered.</h1><p>Sauces, snacks, drinks and baking staples from the brands you already love, shipped from U.S. warehouses.</p><div class="btns"><a class="pill dark" href="/products.html">Shop all products</a><a class="pill" href="/brands.html">Browse brands</a></div><ul class="trust"><li>{ic("M5 12l4 4 10-10")}Ships from U.S. warehouses</li><li>{ic("M5 12l4 4 10-10")}30-day returns</li><li>{ic("M5 12l4 4 10-10")}Real support</li></ul></div>{collage}</section>
-<section class="wrap sec"><div class="head"><h2>Featured products</h2><a href="/products.html">Shop all</a></div><div class="cards">{feat}</div></section>
+<section class="wrap sec"><div class="head"><h2>Featured products</h2><a href="/products.html">Shop all</a></div><div class="cards feat">{feat}</div></section>
 <section class="wrap sec"><h2>Brands we stock</h2><div class="strip">{strip}</div><a class="more" href="/brands.html">See all {NB} brands</a></section>
 <section class="wrap sec"><div class="head"><h2>Shop by category</h2><a href="/products.html">View all</a></div>{tiles}</section>
 <section class="wrap sec vals"><div><i>{ic("M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3z")}</i><h3>Ships from the U.S.</h3><p>Stock held in warehouses across the country.</p></div><div><i>{ic("M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3")}</i><h3>30-day returns</h3><p>A clear, written <a href="/returns.html">return policy</a>.</p></div><div><i>{ic("M3 6h18v12H3zM3 7l9 6 9-6")}</i><h3>Real support</h3><p>Email <a href="mailto:{EMAIL}">{EMAIL}</a> and a person replies.</p></div></section><script type="application/ld+json">{ORG_LD}</script>""")

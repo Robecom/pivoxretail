@@ -83,3 +83,14 @@ header.scrolled .bar{box-shadow:0 8px 24px -14px rgba(0,0,0,.3)}.bar{transition:
 .hp:nth-child(3n+2){transform:translateY(36px)}.hp:hover{transform:translateY(-5px);box-shadow:0 22px 34px -22px rgba(0,0,0,.45)}.hp:nth-child(3n+2):hover{transform:translateY(30px)}
 .hp img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:12px;box-sizing:border-box}
 @media(max-width:860px){.hero-collage{padding-bottom:30px}}
+/* featured products: 4 columns on desktop (3 rows of 4) */
+.cards.feat{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1000px){.cards.feat{grid-template-columns:repeat(2,1fr)}}
+/* home: featured products = 3 rows of 4 on desktop */
+.cards.featured{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1023px){.cards.featured{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:639px){.cards.featured{grid-template-columns:repeat(2,1fr);gap:12px}.cards.featured .card:nth-child(n+7){display:none}.cards.featured .info{padding:12px 14px 16px}}
+/* home: featured products = 3 rows of 4 on desktop */
+.cards.feat{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1000px){.cards.feat{grid-template-columns:repeat(2,1fr)}.feat .card:nth-child(n+9){display:none}}
+@media(max-width:640px){.cards.feat{grid-template-columns:1fr}.feat .card:nth-child(n+5){display:none}}
